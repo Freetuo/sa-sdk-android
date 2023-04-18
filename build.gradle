@@ -2,11 +2,16 @@
 buildscript {
     apply from: "script_config/config.gradle"
     repositories {
-        jcenter()
         mavenCentral()
         google()
         maven {
             url 'https://maven.google.com'
+        }
+        maven{
+            url 'https://maven.aliyun.com/nexus/content/repositories/jcenter'
+        }
+        maven {
+            url 'https://maven.aliyun.com/repository/google'
         }
         maven {
             url './repo'
@@ -27,14 +32,19 @@ buildscript {
 
 allprojects {
     repositories {
-        jcenter()
         mavenCentral()
         google()
         maven {
             url 'https://maven.google.com'
         }
+        maven{
+            url 'https://maven.aliyun.com/nexus/content/repositories/jcenter'
+        }
         maven {
-            url './repo'
+            url 'https://maven.aliyun.com/repository/google'
+        }
+        maven {
+            url '../repo'
         }
     }
 }
