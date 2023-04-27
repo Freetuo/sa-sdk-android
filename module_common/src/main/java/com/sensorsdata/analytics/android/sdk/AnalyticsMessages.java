@@ -41,6 +41,8 @@ import com.sensorsdata.analytics.android.sdk.util.NetworkUtils;
 import com.sensorsdata.analytics.android.sdk.util.TimeUtils;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -309,6 +311,7 @@ public class AnalyticsMessages {
                 SALog.i(TAG, String.format("can not connect %s, it shouldn't happen", url));
                 return;
             }
+            connection.setRequestProperty("Content-Type", "application/json");
             SAConfigOptions configOptions = SensorsDataAPI.getConfigOptions();
             if (configOptions != null && configOptions.mSSLSocketFactory != null
                     && connection instanceof HttpsURLConnection) {
@@ -327,22 +330,28 @@ public class AnalyticsMessages {
 
             Uri.Builder builder = new Uri.Builder();
             //先校验crc
-            if (!TextUtils.isEmpty(data)) {
+/*            if (!TextUtils.isEmpty(data)) {
                 builder.appendQueryParameter("crc", String.valueOf(data.hashCode()));
-            }
-
-            builder.appendQueryParameter("gzip", gzip);
-            builder.appendQueryParameter("data_list", data);
-            if (is_instant_event) {
+            }*/
+            // builder.appendQueryParameter("gzip", gzip);
+            builder.appendQueryParameter("reportList", rawMessage);
+            /*if (is_instant_event) {
                 builder.appendQueryParameter("instant_event", "true");
-            }
+            }*/
 
-            String query = builder.build().getEncodedQuery();
+            // String query = builder.build().getEncodedQuery();
+
+            String query = builder.build().getQuery();
             if (TextUtils.isEmpty(query)) {
                 return;
             }
 
-            connection.setFixedLengthStreamingMode(query.getBytes(CHARSET_UTF8).length);
+            //设置body内的参数，put到JSONObject中
+            JSONObject param = new JSONObject();
+            param.put("reportList", new JSONArray(rawMessage));
+            byte[] requestBody = param.toString().getBytes(CHARSET_UTF8);
+
+            connection.setFixedLengthStreamingMode(requestBody.length);
             connection.setDoOutput(true);
             connection.setRequestMethod("POST");
             //设置连接超时时间
@@ -351,7 +360,7 @@ public class AnalyticsMessages {
             connection.setReadTimeout(30 * 1000);
             out = connection.getOutputStream();
             bout = new BufferedOutputStream(out);
-            bout.write(query.getBytes(CHARSET_UTF8));
+            bout.write(requestBody);
             bout.flush();
 
             int responseCode = connection.getResponseCode();
@@ -393,6 +402,8 @@ public class AnalyticsMessages {
             }
         } catch (IOException e) {
             throw new ConnectErrorException(e);
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         } finally {
             closeStream(bout, out, in, connection);
         }

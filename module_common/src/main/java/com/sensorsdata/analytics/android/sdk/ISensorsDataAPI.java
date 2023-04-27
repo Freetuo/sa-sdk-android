@@ -369,6 +369,11 @@ public interface ISensorsDataAPI extends IUserIdentityAPI, SAAdvertAPIProtocol, 
      */
     void track(String eventName);
 
+    // void pantumTrack(String eventName, JSONObject properties);
+
+    void pantumTrack(String eventName, long userId, String subSource, String actionType, JSONObject extra);
+
+
     /**
      * 初始化事件的计时器。
      * 若需要统计某个事件的持续时间，先在事件开始时调用 trackTimer("Event") 记录事件开始时间，该方法并不会真正发

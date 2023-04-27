@@ -24,9 +24,11 @@ import android.database.sqlite.SQLiteBlobTooBigException;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.sensorsdata.analytics.android.sdk.SALog;
 import com.sensorsdata.analytics.android.sdk.core.business.instantevent.InstantEventUtils;
+import com.sensorsdata.analytics.android.sdk.util.JSONUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -120,11 +122,23 @@ class EventDataOperation extends DataOperation {
                     try {
                         keyData = cursor.getString(cursor.getColumnIndexOrThrow(DbParams.KEY_DATA));
                         keyData = parseData(keyData);
+                        // TODO: 2023/4/20 只获取 properties里的数据
                         if (!TextUtils.isEmpty(keyData)) {
-                            dataBuilder.append(keyData, 0, keyData.length() - 1)
-                                    .append(flush_time)
-                                    .append(System.currentTimeMillis())
-                                    .append("}").append(suffix);
+                            JSONObject keyDataJsonObject = new JSONObject(keyData);
+                            if (keyDataJsonObject.has("pantum_properties")) {
+                                String pantumProperties = keyDataJsonObject.getJSONObject("pantum_properties").toString();
+                                dataBuilder.append(pantumProperties, 0, pantumProperties.length() - 1)
+                                        .append("}")
+                                        .append(suffix);
+                            } else {
+                                Log.e(TAG, "Not a pantum data, " + keyData);
+                                if (cursor.isLast()) {
+                                    if (dataBuilder.charAt(dataBuilder.length() - 1) == ',') {
+                                        dataBuilder.deleteCharAt(dataBuilder.length() - 1);
+                                    }
+                                    dataBuilder.append(suffix);
+                                }
+                            }
                         }
                     } catch (Exception e) {
                         SALog.printStackTrace(e);

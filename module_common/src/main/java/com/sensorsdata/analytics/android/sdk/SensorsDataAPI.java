@@ -32,6 +32,7 @@ import com.sensorsdata.analytics.android.sdk.core.business.exposure.SAExposureDa
 import com.sensorsdata.analytics.android.sdk.core.business.timer.EventTimer;
 import com.sensorsdata.analytics.android.sdk.core.business.timer.EventTimerManager;
 import com.sensorsdata.analytics.android.sdk.core.event.InputData;
+import com.sensorsdata.analytics.android.sdk.core.event.PantumProperties;
 import com.sensorsdata.analytics.android.sdk.core.mediator.Modules;
 import com.sensorsdata.analytics.android.sdk.core.mediator.SAModuleManager;
 import com.sensorsdata.analytics.android.sdk.core.rpc.SensorsDataContentObserver;
@@ -1034,6 +1035,52 @@ public class SensorsDataAPI extends AbstractSensorsDataAPI {
                             _properties = cloneProperties;
                         }
                         mSAContextManager.trackEvent(new InputData().setEventName(eventName).setEventType(EventType.TRACK).setProperties(_properties));
+                    } catch (Exception e) {
+                        SALog.printStackTrace(e);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            SALog.printStackTrace(e);
+        }
+    }
+
+    @Override
+    public void pantumTrack(String eventName, long userId, String subSource, String actionType, JSONObject extra) {
+        PantumProperties pantumProperties = new PantumProperties();
+        pantumProperties.setSource(eventName)
+                .setSubSource(subSource)
+                .setUserId(userId)
+                .setActionType(actionType)
+                .setExtra(extra);
+        pantumTrack(eventName, pantumProperties.toJSONObject());
+    }
+
+    private void pantumTrack(final String eventName, JSONObject properties) {
+        try {
+
+            JSONObject extra = null;
+            if (properties.has("extra")) {
+                extra = properties.getJSONObject("extra");
+            }
+
+            final JSONObject cloneProperties = JSONUtils.cloneJsonObject(properties);
+            cloneProperties.put("extra", extra);
+            JSONUtils.mergeDistinctProperty(JSONUtils.cloneJsonObject(getDynamicProperty()), cloneProperties);
+            mTrackTaskManager.addTrackEventTask(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        JSONObject _properties = SAModuleManager.getInstance().invokeModuleFunction(Modules.Advert.MODULE_NAME,
+                                Modules.Advert.METHOD_MERGE_CHANNEL_EVENT_PROPERTIES, eventName, cloneProperties);
+                        if (_properties == null) {
+                            _properties = cloneProperties;
+                        }
+                        mSAContextManager.trackEvent(new InputData()
+                                .setPantum(true)
+                                .setEventName(eventName)
+                                .setEventType(EventType.TRACK)
+                                .setProperties(_properties));
                     } catch (Exception e) {
                         SALog.printStackTrace(e);
                     }

@@ -18,10 +18,12 @@
 package com.sensorsdata.analytics.android.sdk.core.event.imp;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.sensorsdata.analytics.android.sdk.SALog;
 import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
 import com.sensorsdata.analytics.android.sdk.core.SAContextManager;
+import com.sensorsdata.analytics.android.sdk.core.event.PantumProperties;
 import com.sensorsdata.analytics.android.sdk.internal.beans.EventType;
 import com.sensorsdata.analytics.android.sdk.core.business.timer.EventTimer;
 import com.sensorsdata.analytics.android.sdk.core.business.timer.EventTimerManager;
@@ -54,7 +56,11 @@ class TrackEventAssemble extends BaseEventAssemble {
     public Event assembleData(InputData input) {
         try {
             EventType eventType = input.getEventType();
-            JSONObject properties = JSONUtils.cloneJsonObject(input.getProperties());
+
+            JSONObject properties = null;
+            if (!input.isPantum()) {
+                properties = JSONUtils.cloneJsonObject(input.getProperties());
+            }
             if (properties == null) {
                 properties = new JSONObject();
             }
@@ -70,12 +76,14 @@ class TrackEventAssemble extends BaseEventAssemble {
             appendLibProperty(eventType, trackEvent);
             appendUserIDs(input, trackEvent);
             appendSessionId(eventType, trackEvent);
-            appendPluginProperties(eventType, input.getProperties(), trackEvent);
+            appendPluginProperties(eventType, input, trackEvent);
             handlePropertyProtocols(trackEvent);
             if (!handleEventCallback(eventType, trackEvent)) {
                 return null;
             }
             appendPluginVersion(eventType, trackEvent);
+            // 单独处理pantum数据
+            handlePantumProperty(input, eventType, trackEvent);
             SADataHelper.assertPropertyTypes(trackEvent.getProperties());
             handleEventListener(eventType, trackEvent, mContextManager);
             if (SALog.isLogEnabled()) {
@@ -86,6 +94,38 @@ class TrackEventAssemble extends BaseEventAssemble {
             SALog.printStackTrace(e);
         }
         return null;
+    }
+
+    private void handlePantumProperty(InputData input, EventType eventType, TrackEvent trackEvent) {
+        if (!input.isPantum()) {
+            Log.e(TAG, "Is not a pantum data, don't need handle!");
+            return;
+        }
+        JSONObject properties = input.getProperties();
+        String deviceId = trackEvent.getProperties().optString("$device_id");
+        long userId = properties.optLong("userId");
+        String actionType = properties.optString("actionType");
+        String source = input.getEventName();
+        String subSource = properties.optString("subSource");
+        JSONObject extra = null;
+        try {
+            if (input.getProperties().has("extra")) {
+                extra = input.getProperties().getJSONObject("extra");
+            }
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        PantumProperties pantumProperties = new PantumProperties();
+        pantumProperties
+                .setSource(source)
+                .setSubSource(subSource)
+                .setUserId(userId)
+                .setDeviceId(deviceId)
+                .setActionType(actionType)
+                .setExtra(extra)
+                .setReportTime(trackEvent.getTime() / 1000);
+        trackEvent.setPantumProperties(pantumProperties.toJSONObject());
+        Log.e(TAG, "handlePantumProperty, " + trackEvent.getPantumProperties().toString());
     }
 
     private boolean isEventIgnore(String eventName, EventType eventType, SAContextManager contextManager) {
@@ -197,7 +237,9 @@ class TrackEventAssemble extends BaseEventAssemble {
         trackEvent.setProperties(propertyJson);
     }
 
-    private void appendPluginProperties(EventType eventType, JSONObject properties, TrackEvent trackEvent) throws JSONException {
+    private void appendPluginProperties(EventType eventType, InputData input, TrackEvent trackEvent) throws JSONException {
+        JSONObject properties = input.getProperties();
+
         SAPropertyFilter filter = new SAPropertyFilter();
         filter.setEvent(trackEvent.getEventName());
         filter.setTime(trackEvent.getTime());
@@ -205,10 +247,12 @@ class TrackEventAssemble extends BaseEventAssemble {
         filter.setEventJson(SAPropertyFilter.IDENTITIES, new JSONObject(trackEvent.getIdentities().toString()));
         filter.setProperties(trackEvent.getProperties());
         filter.setType(eventType);
-        // custom properties from user
-        SAPropertyPlugin customPlugin = mContextManager.getPluginManager().getPropertyPlugin(InternalCustomPropertyPlugin.class.getName());
-        if (customPlugin instanceof InternalCustomPropertyPlugin) {
-            ((InternalCustomPropertyPlugin) customPlugin).saveCustom(properties);
+        if (!input.isPantum()) {
+            // custom properties from user
+            SAPropertyPlugin customPlugin = mContextManager.getPluginManager().getPropertyPlugin(InternalCustomPropertyPlugin.class.getName());
+            if (customPlugin instanceof InternalCustomPropertyPlugin) {
+                ((InternalCustomPropertyPlugin) customPlugin).saveCustom(properties);
+            }
         }
 
         SAPropertiesFetcher propertiesFetcher = mContextManager.getPluginManager().propertiesHandler(filter);

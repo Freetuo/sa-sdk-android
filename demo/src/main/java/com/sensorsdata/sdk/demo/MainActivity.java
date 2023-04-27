@@ -22,6 +22,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
+
+import org.json.JSONObject;
+
 public class MainActivity extends Activity {
 
     @Override
@@ -30,6 +34,24 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         initLambdaButton();
         initButton();
+
+        Button button = (Button) findViewById(R.id.btn_make_event);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                JSONObject properties = new JSONObject();
+                try {
+                    properties.put("custom1", "1");
+                    properties.put("custom2", "2");
+                    properties.put("custom3", "3");
+                    // properties.put("extra", null);
+                } catch (Exception e) {
+
+                }
+                 SensorsDataAPI.sharedInstance().pantumTrack("PRACTICE", 123L, "", "CLICK", null);
+//                SensorsDataAPI.sharedInstance().pantumTrack("PRACTICE", "123", "", "CLICK", properties);
+            }
+        });
     }
 
     public void onViewClick(View view) {

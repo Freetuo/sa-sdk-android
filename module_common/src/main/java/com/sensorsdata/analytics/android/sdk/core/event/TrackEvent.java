@@ -37,6 +37,8 @@ public class TrackEvent extends Event {
     private String mItemType;
     private String mItemId;
 
+    private JSONObject mPantumProperties;
+
     @Override
     public JSONObject toJSONObject() {
         try {
@@ -78,6 +80,9 @@ public class TrackEvent extends Event {
 
             jsonObject.put("lib", getLib());
             jsonObject.put("properties", getProperties());
+            if (null != getPantumProperties()) {
+                jsonObject.put("pantum_properties", getPantumProperties());
+            }
             return jsonObject;
         } catch (Exception e) {
             SALog.printStackTrace(e);
@@ -147,5 +152,13 @@ public class TrackEvent extends Event {
 
     public void setItemId(String mItemId) {
         this.mItemId = mItemId;
+    }
+
+    public JSONObject getPantumProperties() {
+        return mPantumProperties;
+    }
+
+    public void setPantumProperties(JSONObject properties) {
+        this.mPantumProperties = properties;
     }
 }

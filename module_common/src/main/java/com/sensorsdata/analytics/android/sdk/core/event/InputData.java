@@ -22,6 +22,8 @@ import com.sensorsdata.analytics.android.sdk.internal.beans.EventType;
 import org.json.JSONObject;
 
 public class InputData {
+
+    private boolean isPantum;
     protected EventType mEventType;
     protected String mEventName;
     protected JSONObject mProperties;
@@ -31,6 +33,15 @@ public class InputData {
     protected long mTime;
     // extend input_data, h5
     protected String mExtras;
+
+    public boolean isPantum() {
+        return isPantum;
+    }
+
+    public InputData setPantum(boolean pantum) {
+        isPantum = pantum;
+        return this;
+    }
 
     public EventType getEventType() {
         if (mEventType == null) {

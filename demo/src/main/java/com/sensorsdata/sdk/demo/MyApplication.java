@@ -26,7 +26,8 @@ public class MyApplication extends Application {
     /**
      * Sensors Analytics 采集数据的地址
      */
-    private final static String SA_SERVER_URL = "https://sdkdebugtest.datasink.sensorsdata.cn/sa?project=default&token=cfb8b60e42e0ae9b";
+    // private final static String SA_SERVER_URL = "https://sdkdebugtest.datasink.sensorsdata.cn/sa?project=default&token=cfb8b60e42e0ae9b";
+    private final static String SA_SERVER_URL = "http://192.168.100.252:8888/api/app/support/trace/report";
 
     @Override
     public void onCreate() {
@@ -40,12 +41,12 @@ public class MyApplication extends Application {
     private void initSensorsDataAPI() {
         SAConfigOptions configOptions = new SAConfigOptions(SA_SERVER_URL);
         // 打开自动采集, 并指定追踪哪些 AutoTrack 事件
-        configOptions.setAutoTrackEventType(SensorsAnalyticsAutoTrackEventType.APP_START |
+        /*configOptions.setAutoTrackEventType(SensorsAnalyticsAutoTrackEventType.APP_START |
                 SensorsAnalyticsAutoTrackEventType.APP_END |
                 SensorsAnalyticsAutoTrackEventType.APP_VIEW_SCREEN |
-                SensorsAnalyticsAutoTrackEventType.APP_CLICK);
+                SensorsAnalyticsAutoTrackEventType.APP_CLICK);*/
         // 打开 crash 信息采集
-        configOptions.enableTrackAppCrash();
+        // configOptions.enableTrackAppCrash();
         //传入 SAConfigOptions 对象，初始化神策 SDK
         SensorsDataAPI.startWithConfigOptions(this, configOptions);
     }
