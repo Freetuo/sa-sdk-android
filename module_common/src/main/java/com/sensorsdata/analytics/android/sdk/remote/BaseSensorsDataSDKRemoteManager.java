@@ -248,7 +248,14 @@ public abstract class BaseSensorsDataSDKRemoteManager {
      */
     protected void requestRemoteConfig(boolean enableConfigV, HttpCallback.StringCallback callback) {
         try {
-            String configUrl = buildRemoteUrl(enableConfigV);
+            // TODO: 2023/5/11 WWM 杨海龙反馈会调
+            //  https://api-uat-cloudprint.pantum.com/api/app/support/trace/
+            //  config/Android.conf?app_id=com.pantum.mobileprint 的记录，经排查会调buildRemoteUrl(),
+            //  暂无法从应用配置方面解决，故注释下面代码，并设置configUrl = "",这样就不会请求下面接口
+            // String configUrl = buildRemoteUrl(enableConfigV);
+            String configUrl = "";
+            
+            
             if (TextUtils.isEmpty(configUrl)) return;
             new RequestHelper.Builder(HttpMethod.GET, configUrl)
                     .callback(callback)
