@@ -13,25 +13,31 @@ import org.json.JSONObject;
  */
 
 public class PantumProperties {
-	// 用户id
+	/** 用户id */
 	private long userId;
-	// 设备标识
+	/** 设备标识 */
 	private String deviceId;
-	/* 来源 页面-按钮<br/>(See: 来源类型)
+	/** 来源 页面-按钮<br/>(See: 来源类型)
 		PRACTICE string 同步练习
 		EXAM     string 同步试卷
 	*/
 	private String source;
-	// 子来源
+	/** 子来源 */
 	private String subSource;
-	// 其他信息 json
+	/** 其他信息 json */
 	private JSONObject extra;
-	/* 事件类型<br/>(See: 事件类型)
+	/** 事件类型<br/>(See: 事件类型)
 		VIEW  string 浏览
 		CLICK string 点击
 	*/
 	private String actionType;
-	// 上报时间 s
+	/** 设备类型
+	 * ANDROID 安卓
+	 * IOS 苹果
+	 * WEB web
+	 * WECHAT 微信小程序*/
+	private String deviceType;
+	/** 上报时间 s */
 	private long reportTime;
 
 	public long getUserId() {
@@ -97,6 +103,15 @@ public class PantumProperties {
 		return this;
 	}
 
+	public String getDeviceType() {
+		return deviceType;
+	}
+
+	public PantumProperties setDeviceType(String deviceType) {
+		this.deviceType = deviceType;
+		return this;
+	}
+
 	public JSONObject toJSONObject() {
 		try {
 			JSONObject jsonObject = new JSONObject();
@@ -105,6 +120,7 @@ public class PantumProperties {
 			jsonObject.put("source", getSource());
 			jsonObject.put("subSource", getSubSource());
 			jsonObject.put("actionType", getActionType());
+			jsonObject.put("deviceType", getDeviceType());
 			jsonObject.put("reportTime", getReportTime());
 			if (getExtra() != null) {
 				jsonObject.put("extra", getExtra());

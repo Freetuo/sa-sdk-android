@@ -122,6 +122,7 @@ class TrackEventAssemble extends BaseEventAssemble {
                 .setUserId(userId)
                 .setDeviceId(deviceId)
                 .setActionType(actionType)
+                .setDeviceType("ANDROID")
                 .setExtra(extra)
                 .setReportTime(trackEvent.getTime() / 1000);
         trackEvent.setPantumProperties(pantumProperties.toJSONObject());
