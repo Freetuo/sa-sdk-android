@@ -23,7 +23,9 @@ import android.view.View;
 import android.widget.Button;
 
 import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
+import com.sensorsdata.analytics.android.sdk.pantumcontant.ActionType;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends Activity {
@@ -70,6 +72,33 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
 
+            }
+        });
+
+        findViewById(R.id.btn_time_start).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SensorsDataAPI.sharedInstance().trackTimerStart("PT_TIME_EVENT");
+            }
+        });
+
+        findViewById(R.id.btn_time_end).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                long userId = 1L;
+                JSONObject extra = new JSONObject();
+                try {
+                    extra.put("from", "1");
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+                SensorsDataAPI.sharedInstance().pantumTrack(
+                        "PT_TIME_EVENT",
+                        userId,
+                        "",
+                        ActionType.TIME,
+                        extra
+                );
             }
         });
     }

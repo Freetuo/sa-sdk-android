@@ -44,6 +44,7 @@ import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentSuperProp
 import com.sensorsdata.analytics.android.sdk.deeplink.SensorsDataDeepLinkCallback;
 import com.sensorsdata.analytics.android.sdk.deeplink.SensorsDataDeferredDeepLinkCallback;
 import com.sensorsdata.analytics.android.sdk.internal.beans.EventType;
+import com.sensorsdata.analytics.android.sdk.pantumcontant.ActionType;
 import com.sensorsdata.analytics.android.sdk.plugin.property.SAPropertyPlugin;
 import com.sensorsdata.analytics.android.sdk.plugin.property.impl.SAPresetPropertyPlugin;
 import com.sensorsdata.analytics.android.sdk.remote.BaseSensorsDataSDKRemoteManager;
@@ -61,6 +62,7 @@ import java.net.URLEncoder;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -1047,13 +1049,23 @@ public class SensorsDataAPI extends AbstractSensorsDataAPI {
 
     @Override
     public void pantumTrack(String eventName, long userId, String subSource, String actionType, JSONObject extra) {
-        PantumProperties pantumProperties = new PantumProperties();
-        pantumProperties.setSource(eventName)
-                .setSubSource(subSource)
-                .setUserId(userId)
-                .setActionType(actionType)
-                .setExtra(extra);
-        pantumTrack(eventName, pantumProperties.toJSONObject());
+        if (Objects.equals(actionType, ActionType.TIME)) {
+            PantumProperties pantumProperties = new PantumProperties();
+            pantumProperties.setSource(eventName)
+                    .setSubSource(subSource)
+                    .setUserId(userId)
+                    .setActionType(actionType)
+                    .setExtra(extra);
+            pantumTrackTimerEnd(eventName, pantumProperties.toJSONObject());
+        } else {
+            PantumProperties pantumProperties = new PantumProperties();
+            pantumProperties.setSource(eventName)
+                    .setSubSource(subSource)
+                    .setUserId(userId)
+                    .setActionType(actionType)
+                    .setExtra(extra);
+            pantumTrack(eventName, pantumProperties.toJSONObject());
+        }
     }
 
     private void pantumTrack(final String eventName, JSONObject properties) {
@@ -1070,6 +1082,43 @@ public class SensorsDataAPI extends AbstractSensorsDataAPI {
             mTrackTaskManager.addTrackEventTask(new Runnable() {
                 @Override
                 public void run() {
+                    try {
+                        JSONObject _properties = SAModuleManager.getInstance().invokeModuleFunction(Modules.Advert.MODULE_NAME,
+                                Modules.Advert.METHOD_MERGE_CHANNEL_EVENT_PROPERTIES, eventName, cloneProperties);
+                        if (_properties == null) {
+                            _properties = cloneProperties;
+                        }
+                        mSAContextManager.trackEvent(new InputData()
+                                .setPantum(true)
+                                .setEventName(eventName)
+                                .setEventType(EventType.TRACK)
+                                .setProperties(_properties));
+                    } catch (Exception e) {
+                        SALog.printStackTrace(e);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            SALog.printStackTrace(e);
+        }
+    }
+
+    private void pantumTrackTimerEnd(final String eventName, JSONObject properties) {
+        final long endTime = SystemClock.elapsedRealtime();
+        try {
+            JSONObject extra = null;
+            if (properties.has("extra")) {
+                extra = properties.getJSONObject("extra");
+            }
+            final JSONObject cloneProperties = JSONUtils.cloneJsonObject(properties);
+            cloneProperties.put("extra", extra);
+
+            mTrackTaskManager.addTrackEventTask(new Runnable() {
+                @Override
+                public void run() {
+                    if (eventName != null) {
+                        EventTimerManager.getInstance().updateEndTime(eventName, endTime);
+                    }
                     try {
                         JSONObject _properties = SAModuleManager.getInstance().invokeModuleFunction(Modules.Advert.MODULE_NAME,
                                 Modules.Advert.METHOD_MERGE_CHANNEL_EVENT_PROPERTIES, eventName, cloneProperties);

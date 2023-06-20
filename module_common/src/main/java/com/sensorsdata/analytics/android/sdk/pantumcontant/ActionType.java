@@ -9,8 +9,10 @@ package com.sensorsdata.analytics.android.sdk.pantumcontant;
  */
 
 public @interface ActionType {
-	// 浏览
+	/** 浏览 */
 	String VIEW = "VIEW";
-	// 点击
+	/** 点击 */
 	String CLICK = "CLICK";
+	/** 浏览时长 */
+	String TIME = "TIME";
 }

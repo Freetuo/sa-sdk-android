@@ -31,6 +31,19 @@
                 android:layout_height="wrap_content"
                 android:text="手动埋"
                 android:textAllCaps="false" />
+            <Button
+                android:id="@+id/btn_time_start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="浏览时长开始"
+                android:textAllCaps="false" />
+            <Button
+                android:id="@+id/btn_time_end"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="浏览时长结束"
+                android:textAllCaps="false" />
+
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

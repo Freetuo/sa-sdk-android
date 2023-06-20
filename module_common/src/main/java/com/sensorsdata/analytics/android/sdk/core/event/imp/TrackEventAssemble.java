@@ -31,6 +31,7 @@ import com.sensorsdata.analytics.android.sdk.core.event.Event;
 import com.sensorsdata.analytics.android.sdk.core.event.InputData;
 import com.sensorsdata.analytics.android.sdk.core.event.TrackEvent;
 import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentLoader;
+import com.sensorsdata.analytics.android.sdk.pantumcontant.ActionType;
 import com.sensorsdata.analytics.android.sdk.plugin.property.SAPropertyPlugin;
 import com.sensorsdata.analytics.android.sdk.plugin.property.beans.SAPropertiesFetcher;
 import com.sensorsdata.analytics.android.sdk.plugin.property.beans.SAPropertyFilter;
@@ -98,22 +99,38 @@ class TrackEventAssemble extends BaseEventAssemble {
 
     private void handlePantumProperty(InputData input, EventType eventType, TrackEvent trackEvent) {
         if (!input.isPantum()) {
-            Log.e(TAG, "Is not a pantum data, don't need handle!");
+            SALog.i(TAG, "Is not a pantum data, don't need handle!");
             return;
         }
         JSONObject properties = input.getProperties();
-        String deviceId = trackEvent.getProperties().optString("$device_id");
+        JSONObject sysProperties = trackEvent.getProperties();
+        String deviceId = sysProperties.optString("$device_id");
         long userId = properties.optLong("userId");
         String actionType = properties.optString("actionType");
         String source = input.getEventName();
         String subSource = properties.optString("subSource");
         JSONObject extra = null;
         try {
-            if (input.getProperties().has("extra")) {
-                extra = input.getProperties().getJSONObject("extra");
+            if (actionType.equals(ActionType.TIME)) {
+                if (sysProperties.has("event_duration")) {
+                    int duration = sysProperties.optInt("event_duration");
+                    if (duration <= 0) {
+                        SALog.i(TAG, "source:" + source + " subSource:" + subSource + "event_duration is invalid, not handle event");
+                        return;
+                    }
+                    if (input.getProperties().has("extra")) {
+                        extra = input.getProperties().getJSONObject("extra");
+                    } else {
+                        extra = new JSONObject();
+                    }
+                    extra.put("duration", duration);
+                } else {
+                    SALog.i(TAG, "source:" + source + " subSource:" + subSource + "is time event, but not find event_duration");
+                    return;
+                }
             }
         } catch (JSONException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
         PantumProperties pantumProperties = new PantumProperties();
         pantumProperties
@@ -126,7 +143,7 @@ class TrackEventAssemble extends BaseEventAssemble {
                 .setExtra(extra)
                 .setReportTime(trackEvent.getTime() / 1000);
         trackEvent.setPantumProperties(pantumProperties.toJSONObject());
-        Log.e(TAG, "handlePantumProperty, " + trackEvent.getPantumProperties().toString());
+        SALog.i(TAG, "handlePantumProperty, " + trackEvent.getPantumProperties().toString());
     }
 
     private boolean isEventIgnore(String eventName, EventType eventType, SAContextManager contextManager) {
@@ -159,7 +176,9 @@ class TrackEventAssemble extends BaseEventAssemble {
                 if (eventTimer != null) {
                     float duration = eventTimer.duration();
                     if (duration > 0) {
-                        trackEvent.getProperties().put("event_duration", Float.valueOf(duration));
+                        SALog.i(TAG, "event_duration = " + duration);
+                        // trackEvent.getProperties().put("event_duration", Float.valueOf(duration));
+                        trackEvent.getProperties().put("event_duration", Math.round(duration));
                     }
                 }
                 if (eventName.endsWith("_SATimer") && eventName.length() > 45) {// Timer 计时交叉计算拼接的字符串长度 45
