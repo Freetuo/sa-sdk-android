@@ -84,7 +84,9 @@ class TrackEventAssemble extends BaseEventAssemble {
             }
             appendPluginVersion(eventType, trackEvent);
             // 单独处理pantum数据
-            handlePantumProperty(input, eventType, trackEvent);
+            if (!handlePantumProperty(input, eventType, trackEvent)){
+                return null;
+            }
             SADataHelper.assertPropertyTypes(trackEvent.getProperties());
             handleEventListener(eventType, trackEvent, mContextManager);
             if (SALog.isLogEnabled()) {
@@ -97,10 +99,17 @@ class TrackEventAssemble extends BaseEventAssemble {
         return null;
     }
 
-    private void handlePantumProperty(InputData input, EventType eventType, TrackEvent trackEvent) {
+    /**
+     * 处理奔图数据
+     * @param input
+     * @param eventType
+     * @param trackEvent
+     * @return 是否是奔图数据且成功处理
+     */
+    private boolean handlePantumProperty(InputData input, EventType eventType, TrackEvent trackEvent) {
         if (!input.isPantum()) {
             SALog.i(TAG, "Is not a pantum data, don't need handle!");
-            return;
+            return false;
         }
         JSONObject properties = input.getProperties();
         JSONObject sysProperties = trackEvent.getProperties();
@@ -116,7 +125,7 @@ class TrackEventAssemble extends BaseEventAssemble {
                     int duration = sysProperties.optInt("event_duration");
                     if (duration <= 0) {
                         SALog.i(TAG, "source:" + source + " subSource:" + subSource + "event_duration is invalid, not handle event");
-                        return;
+                        return false;
                     }
                     if (input.getProperties().has("extra")) {
                         extra = input.getProperties().getJSONObject("extra");
@@ -126,7 +135,7 @@ class TrackEventAssemble extends BaseEventAssemble {
                     extra.put("duration", duration);
                 } else {
                     SALog.i(TAG, "source:" + source + " subSource:" + subSource + "is time event, but not find event_duration");
-                    return;
+                    return false;
                 }
             }
         } catch (JSONException e) {
@@ -144,6 +153,7 @@ class TrackEventAssemble extends BaseEventAssemble {
                 .setReportTime(trackEvent.getTime() / 1000);
         trackEvent.setPantumProperties(pantumProperties.toJSONObject());
         SALog.i(TAG, "handlePantumProperty, " + trackEvent.getPantumProperties().toString());
+        return true;
     }
 
     private boolean isEventIgnore(String eventName, EventType eventType, SAContextManager contextManager) {

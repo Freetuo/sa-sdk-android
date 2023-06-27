@@ -25,7 +25,7 @@ public class PantumProperties {
 	/** 子来源 */
 	private String subSource;
 	/** 其他信息 json */
-	private JSONObject extra;
+	private String extra;
 	/** 事件类型<br/>(See: 事件类型)
 		VIEW  string 浏览
 		CLICK string 点击
@@ -76,12 +76,16 @@ public class PantumProperties {
 		return this;
 	}
 
-	public JSONObject getExtra() {
+	public String getExtra() {
 		return extra;
 	}
 
 	public PantumProperties setExtra(JSONObject extra) {
-		this.extra = extra;
+		if (extra == null) {
+			this.extra = null;
+		} else {
+			this.extra = extra.toString();
+		}
 		return this;
 	}
 

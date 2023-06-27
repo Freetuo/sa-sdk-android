@@ -1048,10 +1048,10 @@ public class SensorsDataAPI extends AbstractSensorsDataAPI {
     }
 
     @Override
-    public void pantumTrack(String eventName, long userId, String subSource, String actionType, JSONObject extra) {
+    public void pantumTrack(String eventName, String source,String subSource, long userId, String actionType, JSONObject extra) {
         if (Objects.equals(actionType, ActionType.TIME)) {
             PantumProperties pantumProperties = new PantumProperties();
-            pantumProperties.setSource(eventName)
+            pantumProperties.setSource(source)
                     .setSubSource(subSource)
                     .setUserId(userId)
                     .setActionType(actionType)
@@ -1059,7 +1059,7 @@ public class SensorsDataAPI extends AbstractSensorsDataAPI {
             pantumTrackTimerEnd(eventName, pantumProperties.toJSONObject());
         } else {
             PantumProperties pantumProperties = new PantumProperties();
-            pantumProperties.setSource(eventName)
+            pantumProperties.setSource(source)
                     .setSubSource(subSource)
                     .setUserId(userId)
                     .setActionType(actionType)
@@ -1692,7 +1692,8 @@ public class SensorsDataAPI extends AbstractSensorsDataAPI {
                 }
             });
 
-            if (mInternalConfigs.debugMode != DebugMode.DEBUG_OFF) {
+            /* 取消debug模式下修改serverUrl */
+            /*if (mInternalConfigs.debugMode != DebugMode.DEBUG_OFF) {
                 String uriPath = serverURI.getPath();
                 if (TextUtils.isEmpty(uriPath)) {
                     return;
@@ -1704,9 +1705,9 @@ public class SensorsDataAPI extends AbstractSensorsDataAPI {
                     // 将 URI Path 中末尾的部分替换成 '/debug'
                     mServerUrl = serverURI.buildUpon().path(newPath).build().toString();
                 }
-            } else {
+            } else {*/
                 mServerUrl = serverUrl;
-            }
+            /*}*/
             mSAConfigOptions.mServerUrl = mServerUrl;
         } catch (Exception e) {
             SALog.printStackTrace(e);
