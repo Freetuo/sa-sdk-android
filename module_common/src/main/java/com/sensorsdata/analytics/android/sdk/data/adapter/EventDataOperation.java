@@ -101,6 +101,7 @@ class EventDataOperation extends DataOperation {
         String data = null;
         String eventIds = null;
         JSONArray idArray = new JSONArray();
+        int pantumDataCount = 0;
         try {
             String instant_event = "0";
             if (is_instant_event) {
@@ -130,8 +131,9 @@ class EventDataOperation extends DataOperation {
                                 dataBuilder.append(pantumProperties, 0, pantumProperties.length() - 1)
                                         .append("}")
                                         .append(suffix);
+                                pantumDataCount++;
                             } else {
-                                Log.e(TAG, "Not a pantum data, " + keyData);
+                                SALog.i(TAG, "Not a pantum data, " + keyData);
                                 if (cursor.isLast()) {
                                     if (dataBuilder.charAt(dataBuilder.length() - 1) == ',') {
                                         dataBuilder.deleteCharAt(dataBuilder.length() - 1);
@@ -155,7 +157,7 @@ class EventDataOperation extends DataOperation {
             }
         }
 
-        if (eventIds != null) {
+        if (eventIds != null && pantumDataCount > 0) {
             return new String[]{eventIds, data, DbParams.GZIP_DATA_EVENT};
         }
         return null;
