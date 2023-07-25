@@ -39,6 +39,16 @@ public class PantumProperties {
 	private String deviceType;
 	/** 上报时间 s */
 	private long reportTime;
+	/** 打印机pid */
+	private String pid;
+	/** 打印机sn */
+	private String sn;
+	/** 设备品牌 */
+	private String deviceBrand;
+	/** 设备型号 */
+	private String deviceModel;
+	/** 客户端版本 */
+	private String clientVersion;
 
 	public long getUserId() {
 		return userId;
@@ -116,15 +126,65 @@ public class PantumProperties {
 		return this;
 	}
 
+	public String getPid() {
+		return pid;
+	}
+
+	public PantumProperties setPid(String pid) {
+		this.pid = pid;
+		return this;
+	}
+
+	public String getSn() {
+		return sn;
+	}
+
+	public PantumProperties setSn(String sn) {
+		this.sn = sn;
+		return this;
+	}
+
+	public String getDeviceBrand() {
+		return deviceBrand;
+	}
+
+	public PantumProperties setDeviceBrand(String deviceBrand) {
+		this.deviceBrand = deviceBrand;
+		return this;
+	}
+
+	public String getDeviceModel() {
+		return deviceModel;
+	}
+
+	public PantumProperties setDeviceModel(String deviceModel) {
+		this.deviceModel = deviceModel;
+		return this;
+	}
+
+	public String getClientVersion() {
+		return clientVersion;
+	}
+
+	public PantumProperties setClientVersion(String clientVersion) {
+		this.clientVersion = clientVersion;
+		return this;
+	}
+
 	public JSONObject toJSONObject() {
 		try {
 			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("userId", getUserId());
-			jsonObject.put("deviceId",getDeviceId());
 			jsonObject.put("source", getSource());
 			jsonObject.put("subSource", getSubSource());
 			jsonObject.put("actionType", getActionType());
+			jsonObject.put("userId", getUserId());
 			jsonObject.put("deviceType", getDeviceType());
+			jsonObject.put("deviceId",getDeviceId());
+			jsonObject.put("deviceBrand",getDeviceBrand());
+			jsonObject.put("deviceModel",getDeviceModel());
+			jsonObject.put("clientVersion",getClientVersion());
+			jsonObject.put("sn",getSn());
+			jsonObject.put("pid",getPid());
 			jsonObject.put("reportTime", getReportTime());
 			if (getExtra() != null) {
 				jsonObject.put("extra", getExtra());

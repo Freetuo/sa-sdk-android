@@ -114,10 +114,15 @@ class TrackEventAssemble extends BaseEventAssemble {
         JSONObject properties = input.getProperties();
         JSONObject sysProperties = trackEvent.getProperties();
         String deviceId = sysProperties.optString("$device_id");
+        String deviceBrand = sysProperties.optString("$brand");
+        String deviceModel = sysProperties.optString("$model");
+        String appVersion = sysProperties.optString("$app_version");
         long userId = properties.optLong("userId");
         String actionType = properties.optString("actionType");
-        String source = input.getEventName();
+        String source = properties.optString("source");
         String subSource = properties.optString("subSource");
+        String sn = properties.optString("sn");
+        String pid = properties.optString("pid");
         JSONObject extra = null;
         try {
             if (actionType.equals(ActionType.TIME)) {
@@ -147,8 +152,13 @@ class TrackEventAssemble extends BaseEventAssemble {
                 .setSubSource(subSource)
                 .setUserId(userId)
                 .setDeviceId(deviceId)
-                .setActionType(actionType)
                 .setDeviceType("ANDROID")
+                .setDeviceBrand(deviceBrand)
+                .setDeviceModel(deviceModel)
+                .setActionType(actionType)
+                .setSn(sn)
+                .setPid(pid)
+                .setClientVersion(appVersion)
                 .setExtra(extra)
                 .setReportTime(trackEvent.getTime() / 1000);
         trackEvent.setPantumProperties(pantumProperties.toJSONObject());

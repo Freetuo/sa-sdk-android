@@ -15,4 +15,8 @@ public @interface ActionType {
 	String CLICK = "CLICK";
 	/** 浏览时长 */
 	String TIME = "TIME";
+	/** 应用启动 */
+	String LAUNCH = "LAUNCH";
+	/** 自定义 */
+	String CUSTOM = "CUSTOM";
 }
