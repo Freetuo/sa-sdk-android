@@ -49,5 +49,6 @@ public class MyApplication extends Application {
         // configOptions.enableTrackAppCrash();
         //传入 SAConfigOptions 对象，初始化神策 SDK
         SensorsDataAPI.startWithConfigOptions(this, configOptions);
+        SensorsDataAPI.sharedInstance().setDebugMode(SensorsDataAPI.DebugMode.DEBUG_ONLY);
     }
 }

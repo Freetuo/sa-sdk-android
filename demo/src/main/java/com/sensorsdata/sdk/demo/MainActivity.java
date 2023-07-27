@@ -25,6 +25,7 @@ import android.widget.Button;
 import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
 import com.sensorsdata.analytics.android.sdk.pantumcontant.ActionType;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -46,11 +47,16 @@ public class MainActivity extends Activity {
                     properties.put("custom1", "1");
                     properties.put("custom2", "2");
                     properties.put("custom3", "3");
+                    JSONArray array = new JSONArray();
+                    array.put("加班申请表.docx");
+                    array.put("发票1.png");
+                    array.put("出差报销.pdf");
+                    properties.put("fileName", array);
                     // properties.put("extra", null);
                 } catch (Exception e) {
 
                 }
-                 SensorsDataAPI.sharedInstance().pantumTrack("PRACTICE", 123L, "", "CLICK", null);
+                 SensorsDataAPI.sharedInstance().pantumTrack("PRACTICE", "", "", 13L, "CLICK", "", "", properties);
 //                SensorsDataAPI.sharedInstance().pantumTrack("PRACTICE", "123", "", "CLICK", properties);
             }
         });
@@ -68,38 +74,26 @@ public class MainActivity extends Activity {
     }
 
     private void initButton() {
-        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        findViewById(R.id.button).setOnClickListener(v -> {
 
-            }
         });
 
-        findViewById(R.id.btn_time_start).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SensorsDataAPI.sharedInstance().trackTimerStart("PT_TIME_EVENT");
-            }
-        });
+        findViewById(R.id.btn_time_start).setOnClickListener(v -> SensorsDataAPI.sharedInstance().trackTimerStart("PT_TIME_EVENT"));
 
-        findViewById(R.id.btn_time_end).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                long userId = 1L;
-                JSONObject extra = new JSONObject();
-                try {
-                    extra.put("from", "1");
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-                SensorsDataAPI.sharedInstance().pantumTrack(
-                        "PT_TIME_EVENT",
-                        userId,
-                        "",
-                        ActionType.TIME,
-                        extra
-                );
+        findViewById(R.id.btn_time_end).setOnClickListener(v -> {
+            long userId = 1L;
+            JSONObject extra = new JSONObject();
+            try {
+                extra.put("from", "1");
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
             }
+            SensorsDataAPI.sharedInstance().pantumTrack(
+                    "PT_TIME_EVENT", "", "",
+                    userId,
+                    ActionType.TIME, "", "",
+                    extra
+            );
         });
     }
 }
