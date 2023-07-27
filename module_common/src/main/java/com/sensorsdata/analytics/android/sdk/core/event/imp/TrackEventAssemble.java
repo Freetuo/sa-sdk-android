@@ -142,6 +142,10 @@ class TrackEventAssemble extends BaseEventAssemble {
                     SALog.i(TAG, "source:" + source + " subSource:" + subSource + "is time event, but not find event_duration");
                     return false;
                 }
+            } else {
+                if (input.getProperties().has("extra")) {
+                    extra = input.getProperties().getJSONObject("extra");
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();

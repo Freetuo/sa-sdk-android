@@ -1069,7 +1069,7 @@ public class SensorsDataAPI extends AbstractSensorsDataAPI {
 
             JSONObject extra = null;
             if (properties.has("extra")) {
-                extra = properties.getJSONObject("extra");
+                extra = new JSONObject(properties.getString("extra"));
             }
 
             final JSONObject cloneProperties = JSONUtils.cloneJsonObject(properties);
@@ -1104,7 +1104,7 @@ public class SensorsDataAPI extends AbstractSensorsDataAPI {
         try {
             JSONObject extra = null;
             if (properties.has("extra")) {
-                extra = properties.getJSONObject("extra");
+                extra = new JSONObject(properties.getString("extra"));
             }
             final JSONObject cloneProperties = JSONUtils.cloneJsonObject(properties);
             cloneProperties.put("extra", extra);
