@@ -48,6 +48,8 @@ import java.security.SecureRandom;
 class TrackEventAssemble extends BaseEventAssemble {
     private static final String TAG = "SA.TrackEventAssemble";
     private final SAContextManager mContextManager;
+    private static final String PT_TRACE_ID = new SecureRandom().nextInt() + "";
+
     public TrackEventAssemble(SAContextManager saContextManager) {
         super(saContextManager);
         mContextManager = saContextManager;
@@ -163,6 +165,7 @@ class TrackEventAssemble extends BaseEventAssemble {
                 .setSn(sn)
                 .setPid(pid)
                 .setClientVersion(appVersion)
+                .setTraceId(PT_TRACE_ID)
                 .setExtra(extra)
                 .setReportTime(trackEvent.getTime() / 1000);
         trackEvent.setPantumProperties(pantumProperties.toJSONObject());

@@ -49,7 +49,8 @@ public class PantumProperties {
 	private String deviceModel;
 	/** 客户端版本 */
 	private String clientVersion;
-
+	/** 链路id, 应用冷启动时重置 */
+	private String traceId;
 	public long getUserId() {
 		return userId;
 	}
@@ -171,9 +172,19 @@ public class PantumProperties {
 		return this;
 	}
 
+	public String getTraceId() {
+		return traceId;
+	}
+
+	public PantumProperties setTraceId(String traceId) {
+		this.traceId = traceId;
+		return this;
+	}
+
 	public JSONObject toJSONObject() {
 		try {
 			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("traceId",getTraceId());
 			jsonObject.put("source", getSource());
 			jsonObject.put("subSource", getSubSource());
 			jsonObject.put("actionType", getActionType());
