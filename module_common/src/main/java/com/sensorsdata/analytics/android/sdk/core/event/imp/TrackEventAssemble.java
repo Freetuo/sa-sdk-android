@@ -44,11 +44,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.security.SecureRandom;
+import java.util.UUID;
 
 class TrackEventAssemble extends BaseEventAssemble {
     private static final String TAG = "SA.TrackEventAssemble";
     private final SAContextManager mContextManager;
-    private static final String PT_TRACE_ID = new SecureRandom().nextInt() + "";
+    private static final String PT_TRACE_ID = UUID.randomUUID() + "";
 
     public TrackEventAssemble(SAContextManager saContextManager) {
         super(saContextManager);
