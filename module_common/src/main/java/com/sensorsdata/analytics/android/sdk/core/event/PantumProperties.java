@@ -53,8 +53,6 @@ public class PantumProperties {
 	private String traceId;
 	/** 系统版本  ANDROID 11 */
 	private String systemVersion;
-	/** 屏幕分辨率 */
-	private String screenResolution;
 	public long getUserId() {
 		return userId;
 	}
@@ -194,15 +192,6 @@ public class PantumProperties {
 		return this;
 	}
 
-	public String getScreenResolution() {
-		return screenResolution;
-	}
-
-	public PantumProperties setScreenResolution(String screenResolution) {
-		this.screenResolution = screenResolution;
-		return this;
-	}
-
 	public JSONObject toJSONObject() {
 		try {
 			JSONObject jsonObject = new JSONObject();
@@ -217,7 +206,6 @@ public class PantumProperties {
 			jsonObject.put("deviceModel",getDeviceModel());
 			jsonObject.put("clientVersion",getClientVersion());
 			jsonObject.put("systemVersion",getSystemVersion());
-			jsonObject.put("screenResolution",getScreenResolution());
 			jsonObject.put("sn",getSn());
 			jsonObject.put("pid",getPid());
 			jsonObject.put("reportTime", getReportTime());

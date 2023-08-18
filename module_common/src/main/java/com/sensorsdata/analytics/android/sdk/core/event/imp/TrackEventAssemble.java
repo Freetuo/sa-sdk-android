@@ -122,9 +122,6 @@ class TrackEventAssemble extends BaseEventAssemble {
         String appVersion = sysProperties.optString("$app_version");
         String os = sysProperties.optString("$os").toUpperCase();
         String osVersion = sysProperties.optString("$os_version");
-        int screenWidth = sysProperties.optInt("$screen_width");
-        int screenHeight = sysProperties.optInt("$screen_height");
-
         long userId = properties.optLong("userId");
         String actionType = properties.optString("actionType");
         String source = properties.optString("source");
@@ -168,7 +165,6 @@ class TrackEventAssemble extends BaseEventAssemble {
                 .setDeviceBrand(deviceBrand)
                 .setDeviceModel(deviceModel)
                 .setSystemVersion(os + " " + osVersion)
-                .setScreenResolution(screenWidth + "*" + screenHeight)
                 .setActionType(actionType)
                 .setSn(sn)
                 .setPid(pid)
