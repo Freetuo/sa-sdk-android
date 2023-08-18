@@ -17,6 +17,8 @@ public @interface ActionType {
 	String TIME = "TIME";
 	/** 应用启动 */
 	String LAUNCH = "LAUNCH";
+	/** 应用退出 */
+	String EXIT = "EXIT";
 	/** 自定义 */
 	String CUSTOM = "CUSTOM";
 }
