@@ -332,7 +332,8 @@ public class SensorsDataAPI extends AbstractSensorsDataAPI {
             return;
         }
 
-        if (sessionIntervalTime < 10 * 1000 || sessionIntervalTime > 5 * 60 * 1000) {
+        /* 原本范围是 10-300s */
+        if (sessionIntervalTime < 0.5 * 1000 || sessionIntervalTime > 5 * 60 * 1000) {
             SALog.i(TAG, "SessionIntervalTime:" + sessionIntervalTime + " is invalid, session interval time is between 10s and 300s.");
             return;
         }

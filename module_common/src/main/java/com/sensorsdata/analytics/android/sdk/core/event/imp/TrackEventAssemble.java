@@ -37,6 +37,7 @@ import com.sensorsdata.analytics.android.sdk.plugin.property.beans.SAPropertiesF
 import com.sensorsdata.analytics.android.sdk.plugin.property.beans.SAPropertyFilter;
 import com.sensorsdata.analytics.android.sdk.plugin.property.impl.InternalCustomPropertyPlugin;
 import com.sensorsdata.analytics.android.sdk.util.AppInfoUtils;
+import com.sensorsdata.analytics.android.sdk.util.AppStateTools;
 import com.sensorsdata.analytics.android.sdk.util.JSONUtils;
 import com.sensorsdata.analytics.android.sdk.util.SADataHelper;
 
@@ -110,10 +111,16 @@ class TrackEventAssemble extends BaseEventAssemble {
      * @return 是否是奔图数据且成功处理
      */
     private boolean handlePantumProperty(InputData input, EventType eventType, TrackEvent trackEvent) {
-        if (!input.isPantum()) {
-            SALog.i(TAG, "Is not a pantum data, don't need handle!");
+        String eventName = trackEvent.getEventName();
+        // 是否继续处理
+        boolean continueHandle = "$AppStart".equals(eventName) ||
+                "$AppEnd".equals(eventName) ||
+                input.isPantum();
+        if (!continueHandle) {
+            SALog.i(TAG, "handlePantumProperty, Is a not event!");
             return false;
         }
+
         JSONObject properties = input.getProperties();
         JSONObject sysProperties = trackEvent.getProperties();
         String deviceId = sysProperties.optString("$device_id");
@@ -122,38 +129,79 @@ class TrackEventAssemble extends BaseEventAssemble {
         String appVersion = sysProperties.optString("$app_version");
         String os = sysProperties.optString("$os").toUpperCase();
         String osVersion = sysProperties.optString("$os_version");
-        long userId = properties.optLong("userId");
-        String actionType = properties.optString("actionType");
-        String source = properties.optString("source");
-        String subSource = properties.optString("subSource");
-        String sn = properties.optString("sn");
-        String pid = properties.optString("pid");
+        /* userId、 sn、pid 通过动态属性获取 */
+        long userId = sysProperties.optLong("userId");
+        String sn = sysProperties.optString("sn");
+        String pid = sysProperties.optString("pid");
+        /* 以下属性需要特殊处理 */
+        String actionType;
+        String source;
+        String subSource;
         JSONObject extra = null;
-        try {
-            if (actionType.equals(ActionType.TIME)) {
-                if (sysProperties.has("event_duration")) {
-                    int duration = sysProperties.optInt("event_duration");
-                    if (duration <= 0) {
-                        SALog.i(TAG, "source:" + source + " subSource:" + subSource + "event_duration is invalid, not handle event");
-                        return false;
-                    }
-                    if (input.getProperties().has("extra")) {
-                        extra = input.getProperties().getJSONObject("extra");
-                    } else {
-                        extra = new JSONObject();
-                    }
-                    extra.put("duration", duration);
-                } else {
-                    SALog.i(TAG, "source:" + source + " subSource:" + subSource + "is time event, but not find event_duration");
-                    return false;
-                }
-            } else {
+        if ("$AppStart".equals(eventName)) {
+            boolean resumeFromBackground = sysProperties.optBoolean("$resume_from_background");
+            actionType = ActionType.LAUNCH;
+            source = resumeFromBackground?"SWITCH": "NEW";
+            subSource = "";
+            try {
                 if (input.getProperties().has("extra")) {
                     extra = input.getProperties().getJSONObject("extra");
+                } else {
+                    extra = new JSONObject();
                 }
+                String screenWidth = sysProperties.optString("$screen_width");
+                String screenHeight = sysProperties.optString("$screen_height");
+                extra.put("screenResolution", screenWidth + "*" + screenHeight);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
+        } else if ("$AppEnd".equals(eventName)) {
+            boolean isAppOnForeground = AppStateTools.getInstance().isAppOnForeground();
+            actionType = ActionType.EXIT;
+            source = isAppOnForeground?"KILLED": "HIDE";
+            subSource = "";
+            try {
+                if (input.getProperties().has("extra")) {
+                    extra = input.getProperties().getJSONObject("extra");
+                } else {
+                    extra = new JSONObject();
+                }
+                int duration = (int) (sysProperties.optDouble("event_duration") * 1000);
+                extra.put("duration", duration);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            /* 由埋点方法调用处参数传入 */
+            actionType = properties.optString("actionType");
+            source = properties.optString("source");
+            subSource = properties.optString("subSource");
+            try {
+                if (actionType.equals(ActionType.TIME)) {
+                    if (sysProperties.has("event_duration")) {
+                        int duration = sysProperties.optInt("event_duration");
+                        if (duration <= 0) {
+                            SALog.i(TAG, "source:" + source + " subSource:" + subSource + "event_duration is invalid, not handle event");
+                            return false;
+                        }
+                        if (input.getProperties().has("extra")) {
+                            extra = input.getProperties().getJSONObject("extra");
+                        } else {
+                            extra = new JSONObject();
+                        }
+                        extra.put("duration", duration);
+                    } else {
+                        SALog.i(TAG, "source:" + source + " subSource:" + subSource + "is time event, but not find event_duration");
+                        return false;
+                    }
+                } else {
+                    if (input.getProperties().has("extra")) {
+                        extra = input.getProperties().getJSONObject("extra");
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
         PantumProperties pantumProperties = new PantumProperties();
         pantumProperties
@@ -171,7 +219,7 @@ class TrackEventAssemble extends BaseEventAssemble {
                 .setClientVersion(appVersion)
                 .setTraceId(PT_TRACE_ID)
                 .setExtra(extra)
-                .setReportTime(trackEvent.getTime() / 1000);
+                .setReportTime(trackEvent.getTime());
         trackEvent.setPantumProperties(pantumProperties.toJSONObject());
         SALog.i(TAG, "handlePantumProperty, " + trackEvent.getPantumProperties().toString());
         return true;
