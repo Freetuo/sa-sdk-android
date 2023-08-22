@@ -1049,14 +1049,11 @@ public class SensorsDataAPI extends AbstractSensorsDataAPI {
     }
 
     @Override
-    public void pantumTrack(String eventName, String source, String subSource, long userId, String actionType, String sn, String pid, JSONObject extra) {
+    public void pantumTrack(String eventName, String source, String subSource, String actionType, JSONObject extra) {
         PantumProperties pantumProperties = new PantumProperties();
         pantumProperties.setSource(source)
                 .setSubSource(subSource)
-                .setUserId(userId)
                 .setActionType(actionType)
-                .setSn(sn)
-                .setPid(pid)
                 .setExtra(extra);
         if (Objects.equals(actionType, ActionType.TIME)) {
             pantumTrackTimerEnd(eventName, pantumProperties.toJSONObject());
