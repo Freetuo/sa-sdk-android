@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
                 } catch (Exception e) {
 
                 }
-                 SensorsDataAPI.sharedInstance().pantumTrack("PRACTICE", "", "", 13L, "CLICK", "", "", properties);
+                 SensorsDataAPI.sharedInstance().pantumTrack("PRACTICE", "", "", "CLICK", properties);
 //                SensorsDataAPI.sharedInstance().pantumTrack("PRACTICE", "123", "", "CLICK", properties);
             }
         });
@@ -81,7 +81,6 @@ public class MainActivity extends Activity {
         findViewById(R.id.btn_time_start).setOnClickListener(v -> SensorsDataAPI.sharedInstance().trackTimerStart("PT_TIME_EVENT"));
 
         findViewById(R.id.btn_time_end).setOnClickListener(v -> {
-            long userId = 1L;
             JSONObject extra = new JSONObject();
             try {
                 extra.put("from", "1");
@@ -89,11 +88,7 @@ public class MainActivity extends Activity {
                 throw new RuntimeException(e);
             }
             SensorsDataAPI.sharedInstance().pantumTrack(
-                    "PT_TIME_EVENT", "", "",
-                    userId,
-                    ActionType.TIME, "", "",
-                    extra
-            );
+                    "PT_TIME_EVENT", "", "", ActionType.TIME, extra);
         });
     }
 }

@@ -22,6 +22,9 @@ import com.sensorsdata.analytics.android.sdk.SAConfigOptions;
 import com.sensorsdata.analytics.android.sdk.SensorsAnalyticsAutoTrackEventType;
 import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MyApplication extends Application {
     /**
      * Sensors Analytics 采集数据的地址
@@ -45,10 +48,22 @@ public class MyApplication extends Application {
                 SensorsAnalyticsAutoTrackEventType.APP_END |
                 SensorsAnalyticsAutoTrackEventType.APP_VIEW_SCREEN |
                 SensorsAnalyticsAutoTrackEventType.APP_CLICK);*/
+        configOptions.setAutoTrackEventType(SensorsAnalyticsAutoTrackEventType.APP_START |
+                SensorsAnalyticsAutoTrackEventType.APP_END);
         // 打开 crash 信息采集
         // configOptions.enableTrackAppCrash();
         //传入 SAConfigOptions 对象，初始化神策 SDK
         SensorsDataAPI.startWithConfigOptions(this, configOptions);
         SensorsDataAPI.sharedInstance().setDebugMode(SensorsDataAPI.DebugMode.DEBUG_ONLY);
+        SensorsDataAPI.sharedInstance().setSessionIntervalTime(5000);
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("pid", "123");
+            jsonObject.put("sn", "300");
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+        SensorsDataAPI.sharedInstance().registerDynamicSuperProperties(() -> jsonObject);
+
     }
 }
