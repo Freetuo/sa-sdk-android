@@ -82,6 +82,8 @@ public class SensorsDataAPI extends AbstractSensorsDataAPI {
      */
     public static String ANDROID_PLUGIN_VERSION = "";
 
+    public static final String PT_TRACE_ID = UUID.randomUUID() + "";
+
     //private
     SensorsDataAPI() {
         super();

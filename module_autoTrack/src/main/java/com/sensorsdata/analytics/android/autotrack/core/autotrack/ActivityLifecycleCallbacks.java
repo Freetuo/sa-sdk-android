@@ -17,6 +17,8 @@
 
 package com.sensorsdata.analytics.android.autotrack.core.autotrack;
 
+import static com.sensorsdata.analytics.android.sdk.SensorsDataAPI.PT_TRACE_ID;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -393,6 +395,7 @@ public class ActivityLifecycleCallbacks implements SensorsDataActivityLifecycleC
 
             endDataProperty.put("$app_version", AppInfoUtils.getAppVersionName(mContextManager.getContext()));
             endDataProperty.put("$lib_version", SensorsDataAPI.sharedInstance().getSDKVersion());
+            endDataProperty.put("pt_trace_id", PT_TRACE_ID);
             if (!endDataProperty.has("$is_first_day")) {
                 endDataProperty.put("$is_first_day", mContextManager.isFirstDay(System.currentTimeMillis()));
             }

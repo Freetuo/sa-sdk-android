@@ -17,20 +17,21 @@
 
 package com.sensorsdata.analytics.android.sdk.core.event.imp;
 
+import static com.sensorsdata.analytics.android.sdk.SensorsDataAPI.PT_TRACE_ID;
+
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.sensorsdata.analytics.android.sdk.SALog;
 import com.sensorsdata.analytics.android.sdk.SensorsDataAPI;
 import com.sensorsdata.analytics.android.sdk.core.SAContextManager;
-import com.sensorsdata.analytics.android.sdk.core.event.PantumProperties;
-import com.sensorsdata.analytics.android.sdk.internal.beans.EventType;
 import com.sensorsdata.analytics.android.sdk.core.business.timer.EventTimer;
 import com.sensorsdata.analytics.android.sdk.core.business.timer.EventTimerManager;
 import com.sensorsdata.analytics.android.sdk.core.event.Event;
 import com.sensorsdata.analytics.android.sdk.core.event.InputData;
+import com.sensorsdata.analytics.android.sdk.core.event.PantumProperties;
 import com.sensorsdata.analytics.android.sdk.core.event.TrackEvent;
 import com.sensorsdata.analytics.android.sdk.data.persistent.PersistentLoader;
+import com.sensorsdata.analytics.android.sdk.internal.beans.EventType;
 import com.sensorsdata.analytics.android.sdk.pantumcontant.ActionType;
 import com.sensorsdata.analytics.android.sdk.plugin.property.SAPropertyPlugin;
 import com.sensorsdata.analytics.android.sdk.plugin.property.beans.SAPropertiesFetcher;
@@ -45,13 +46,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.security.SecureRandom;
-import java.util.UUID;
 
 class TrackEventAssemble extends BaseEventAssemble {
     private static final String TAG = "SA.TrackEventAssemble";
     private final SAContextManager mContextManager;
-    private static final String PT_TRACE_ID = UUID.randomUUID() + "";
-
     public TrackEventAssemble(SAContextManager saContextManager) {
         super(saContextManager);
         mContextManager = saContextManager;
@@ -137,6 +135,7 @@ class TrackEventAssemble extends BaseEventAssemble {
         String actionType;
         String source;
         String subSource;
+        String traceId = PT_TRACE_ID;
         JSONObject extra = null;
         if ("$AppStart".equals(eventName)) {
             boolean resumeFromBackground = sysProperties.optBoolean("$resume_from_background");
@@ -160,6 +159,7 @@ class TrackEventAssemble extends BaseEventAssemble {
             actionType = ActionType.EXIT;
             source = isAppOnForeground?"KILLED": "HIDE";
             subSource = "";
+            traceId = sysProperties.optString("pt_trace_id");
             try {
                 if (input.getProperties().has("extra")) {
                     extra = input.getProperties().getJSONObject("extra");
@@ -217,7 +217,7 @@ class TrackEventAssemble extends BaseEventAssemble {
                 .setSn(sn)
                 .setPid(pid)
                 .setClientVersion(appVersion)
-                .setTraceId(PT_TRACE_ID)
+                .setTraceId(traceId)
                 .setExtra(extra)
                 .setReportTime(trackEvent.getTime());
         trackEvent.setPantumProperties(pantumProperties.toJSONObject());
