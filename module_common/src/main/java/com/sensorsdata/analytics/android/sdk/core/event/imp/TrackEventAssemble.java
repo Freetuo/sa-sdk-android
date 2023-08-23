@@ -17,8 +17,6 @@
 
 package com.sensorsdata.analytics.android.sdk.core.event.imp;
 
-import static com.sensorsdata.analytics.android.sdk.SensorsDataAPI.PT_TRACE_ID;
-
 import android.text.TextUtils;
 
 import com.sensorsdata.analytics.android.sdk.SALog;
@@ -46,6 +44,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.security.SecureRandom;
+import java.util.UUID;
 
 class TrackEventAssemble extends BaseEventAssemble {
     private static final String TAG = "SA.TrackEventAssemble";
@@ -135,12 +134,19 @@ class TrackEventAssemble extends BaseEventAssemble {
         String actionType;
         String source;
         String subSource;
-        String traceId = PT_TRACE_ID;
+        String traceId = SensorsDataAPI.sharedInstance().getPtTraceId();
         JSONObject extra = null;
         if ("$AppStart".equals(eventName)) {
             boolean resumeFromBackground = sysProperties.optBoolean("$resume_from_background");
+            if (resumeFromBackground) {
+                source = "SWITCH";
+            } else {
+                source = "NEW";
+                // 只有当发生AppStart事件，且是冷启动时才去重置traceId
+                traceId = UUID.randomUUID().toString();
+                SensorsDataAPI.sharedInstance().setPtTraceId(traceId);
+            }
             actionType = ActionType.LAUNCH;
-            source = resumeFromBackground?"SWITCH": "NEW";
             subSource = "";
             try {
                 if (input.getProperties().has("extra")) {

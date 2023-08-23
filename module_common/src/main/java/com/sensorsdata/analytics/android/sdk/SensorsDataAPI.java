@@ -20,6 +20,7 @@ import static com.sensorsdata.analytics.android.sdk.util.Base64Coder.CHARSET_UTF
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.SystemClock;
@@ -27,6 +28,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.webkit.WebView;
 
+import com.sensorsdata.analytics.android.sdk.core.SAContextManager;
 import com.sensorsdata.analytics.android.sdk.core.business.SAPropertyManager;
 import com.sensorsdata.analytics.android.sdk.core.business.exposure.SAExposureData;
 import com.sensorsdata.analytics.android.sdk.core.business.timer.EventTimer;
@@ -51,6 +53,7 @@ import com.sensorsdata.analytics.android.sdk.remote.BaseSensorsDataSDKRemoteMana
 import com.sensorsdata.analytics.android.sdk.useridentity.LoginIDAndKey;
 import com.sensorsdata.analytics.android.sdk.util.JSONUtils;
 import com.sensorsdata.analytics.android.sdk.util.SADataHelper;
+import com.sensorsdata.analytics.android.sdk.util.SASpUtils;
 import com.sensorsdata.analytics.android.sdk.util.TimeUtils;
 
 import org.json.JSONArray;
@@ -82,7 +85,10 @@ public class SensorsDataAPI extends AbstractSensorsDataAPI {
      */
     public static String ANDROID_PLUGIN_VERSION = "";
 
-    public static final String PT_TRACE_ID = UUID.randomUUID() + "";
+    /**
+     * 用于追踪应用从启动到退出完整的路径，在冷启动时生成
+     * */
+    private static String ptTraceId = "";
 
     //private
     SensorsDataAPI() {
@@ -243,6 +249,20 @@ public class SensorsDataAPI extends AbstractSensorsDataAPI {
         } catch (Exception e) {
             SALog.printStackTrace(e);
         }
+    }
+
+    public  String getPtTraceId() {
+        if (ptTraceId.isEmpty()) {
+            SharedPreferences sp = SASpUtils.getSharedPreferences(mSAContextManager.getContext(), "pantum", Context.MODE_PRIVATE);
+            ptTraceId = sp.getString("pt_trace_id", "");
+        }
+        return ptTraceId;
+    }
+
+    public void setPtTraceId(String ptTraceId) {
+        SensorsDataAPI.ptTraceId = ptTraceId;
+        SharedPreferences sp = SASpUtils.getSharedPreferences(mSAContextManager.getContext(), "pantum", Context.MODE_PRIVATE);
+        sp.edit().putString("pt_trace_id", ptTraceId).apply();
     }
 
     /**
