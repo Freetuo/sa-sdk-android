@@ -161,11 +161,20 @@ class TrackEventAssemble extends BaseEventAssemble {
                 e.printStackTrace();
             }
         } else if ("$AppEnd".equals(eventName)) {
-            boolean isAppOnForeground = AppStateTools.getInstance().isAppOnForeground();
             actionType = ActionType.EXIT;
-            source = isAppOnForeground?"KILLED": "HIDE";
+            String eventTraceId = sysProperties.optString("pt_trace_id");
+            /* 如果事件携带的traceId等于当前的traceId, 则认为是HIDE，否则为KILLED。
+               这里的判断依赖于：
+               冷启动先产生了AppStart, 生成了新的traceId, 再产生补发的AppEnd事件, 补发的AppEnd的traceId不等于新的traceId；
+               从后台切换回来，先产生补发的AppEnd事件，再产生AppStart事件, 没有新的traceId产生。
+            */
+            if (eventTraceId.equals(traceId)) {
+                source = "HIDE";
+            } else {
+                source = "KILLED";
+            }
+            traceId = eventTraceId;
             subSource = "";
-            traceId = sysProperties.optString("pt_trace_id");
             try {
                 if (input.getProperties().has("extra")) {
                     extra = input.getProperties().getJSONObject("extra");
