@@ -130,6 +130,7 @@ class TrackEventAssemble extends BaseEventAssemble {
         long userId = sysProperties.optLong("userId");
         String sn = sysProperties.optString("sn");
         String pid = sysProperties.optString("pid");
+        String deviceName = sysProperties.optString("deviceName");
         /* 以下属性需要特殊处理 */
         String actionType;
         String source;
@@ -157,6 +158,9 @@ class TrackEventAssemble extends BaseEventAssemble {
                 String screenWidth = sysProperties.optString("$screen_width");
                 String screenHeight = sysProperties.optString("$screen_height");
                 extra.put("screenResolution", screenWidth + "*" + screenHeight);
+                if (deviceName.length() > 0) {
+                    extra.put("deviceName", deviceName);
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -183,6 +187,9 @@ class TrackEventAssemble extends BaseEventAssemble {
                 }
                 int duration = (int) (sysProperties.optDouble("event_duration") * 1000);
                 extra.put("duration", duration);
+                if (deviceName.length() > 0) {
+                    extra.put("deviceName", deviceName);
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -205,13 +212,25 @@ class TrackEventAssemble extends BaseEventAssemble {
                             extra = new JSONObject();
                         }
                         extra.put("duration", duration);
+                        if (deviceName.length() > 0) {
+                            extra.put("deviceName", deviceName);
+                        }
                     } else {
                         SALog.i(TAG, "source:" + source + " subSource:" + subSource + "is time event, but not find event_duration");
                         return false;
                     }
                 } else {
-                    if (input.getProperties().has("extra")) {
-                        extra = input.getProperties().getJSONObject("extra");
+                    if (deviceName.length() > 0) {
+                        if (input.getProperties().has("extra")) {
+                            extra = input.getProperties().getJSONObject("extra");
+                        } else {
+                            extra = new JSONObject();
+                        }
+                        extra.put("deviceName", deviceName);
+                    } else {
+                        if (input.getProperties().has("extra")) {
+                            extra = input.getProperties().getJSONObject("extra");
+                        }
                     }
                 }
             } catch (JSONException e) {
