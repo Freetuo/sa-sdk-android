@@ -126,10 +126,11 @@ class TrackEventAssemble extends BaseEventAssemble {
         String appVersion = sysProperties.optString("$app_version");
         String os = sysProperties.optString("$os").toUpperCase();
         String osVersion = sysProperties.optString("$os_version");
-        /* userId、 sn、pid 通过动态属性获取 */
+        /* userId、 sn、pid、deviceName、printerId 通过动态属性获取 */
         long userId = sysProperties.optLong("userId");
         String sn = sysProperties.optString("sn");
         String pid = sysProperties.optString("pid");
+        String printerId = sysProperties.optString("printerId");
         String deviceName = sysProperties.optString("deviceName");
         /* 以下属性需要特殊处理 */
         String actionType;
@@ -250,6 +251,7 @@ class TrackEventAssemble extends BaseEventAssemble {
                 .setActionType(actionType)
                 .setSn(sn)
                 .setPid(pid)
+                .setPrinterId(printerId)
                 .setClientVersion(appVersion)
                 .setTraceId(traceId)
                 .setExtra(extra)

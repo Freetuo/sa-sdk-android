@@ -53,6 +53,8 @@ public class PantumProperties {
 	private String traceId;
 	/** 系统版本  ANDROID 11 */
 	private String systemVersion;
+	/** 打印机的唯一标识 printName(model)_serverName（主机名） */
+	private String printerId;
 	public long getUserId() {
 		return userId;
 	}
@@ -147,6 +149,15 @@ public class PantumProperties {
 		return this;
 	}
 
+	public String getPrinterId() {
+		return printerId;
+	}
+
+	public PantumProperties setPrinterId(String printerId) {
+		this.printerId = printerId;
+		return this;
+	}
+
 	public String getDeviceBrand() {
 		return deviceBrand;
 	}
@@ -208,6 +219,7 @@ public class PantumProperties {
 			jsonObject.put("systemVersion",getSystemVersion());
 			jsonObject.put("sn",getSn());
 			jsonObject.put("pid",getPid());
+			jsonObject.put("printerId",getPrinterId());
 			jsonObject.put("reportTime", getReportTime());
 			if (getExtra() != null) {
 				jsonObject.put("extra", getExtra());
