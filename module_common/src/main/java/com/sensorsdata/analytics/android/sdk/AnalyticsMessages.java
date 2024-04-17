@@ -577,13 +577,13 @@ public class AnalyticsMessages {
         // appendSignValue(signBuilder, sortQuery(query));
         appendSignBody(signBuilder, requestBody);
         appendSignTimestamp(signBuilder, timestamp);
-        appendSignValue(signBuilder, "&secret=" + mSensorsDataAPI.mDataSignSecret);
+        appendSignValue(signBuilder, "&secret=" + AbstractSensorsDataAPI.mDataSignSecret);
 
         String originalSign = signBuilder.toString();
         String sign = EncryptUtils.encryptMD5ToString(originalSign);
         String method = connection.getRequestMethod();
         String path = connection.getURL().getPath();
-        Log.d(TAG, "接口参数加签-[" + method + "]" + path + ",原始参数："+ originalSign + ", 签名参数：" + sign);
+        SALog.i(TAG, "接口参数加签-[" + method + "]" + path + ",原始参数："+ originalSign + ", 签名参数：" + sign);
         return sign;
     }
 
