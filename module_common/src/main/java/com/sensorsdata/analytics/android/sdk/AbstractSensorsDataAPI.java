@@ -79,6 +79,9 @@ abstract class AbstractSensorsDataAPI implements ISensorsDataAPI {
     protected TrackTaskManagerThread mTrackTaskManagerThread;
     protected SensorsDataDynamicSuperProperties mDynamicSuperPropertiesCallBack;
 
+    /** 上传接口加签私钥 */
+    protected static String mDataSignSecret;
+
     public AbstractSensorsDataAPI(Context context, SAConfigOptions configOptions, SensorsDataAPI.DebugMode debugMode) {
         mInternalConfigs = new InternalConfigOptions();
         mInternalConfigs.context = context;
@@ -243,6 +246,10 @@ abstract class AbstractSensorsDataAPI implements ISensorsDataAPI {
             SALog.setDebug(true);
             setServerUrl(mOriginServerUrl);
         }
+    }
+
+    public void setDataSignSecret(String secret) {
+        mDataSignSecret = secret;
     }
 
     public boolean isDisableDefaultRemoteConfig() {

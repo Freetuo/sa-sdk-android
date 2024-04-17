@@ -26,6 +26,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.sensorsdata.analytics.android.sdk.data.adapter.DbAdapter;
 import com.sensorsdata.analytics.android.sdk.data.adapter.DbParams;
@@ -36,6 +37,7 @@ import com.sensorsdata.analytics.android.sdk.exceptions.ResponseErrorException;
 import com.sensorsdata.analytics.android.sdk.internal.beans.InternalConfigOptions;
 import com.sensorsdata.analytics.android.sdk.util.AppStateTools;
 import com.sensorsdata.analytics.android.sdk.util.Base64Coder;
+import com.sensorsdata.analytics.android.sdk.util.EncryptUtils;
 import com.sensorsdata.analytics.android.sdk.util.JSONUtils;
 import com.sensorsdata.analytics.android.sdk.util.NetworkUtils;
 import com.sensorsdata.analytics.android.sdk.util.TimeUtils;
@@ -52,6 +54,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
@@ -358,6 +361,11 @@ public class AnalyticsMessages {
             connection.setConnectTimeout(30 * 1000);
             //设置读取超时时间
             connection.setReadTimeout(30 * 1000);
+
+            if (mSensorsDataAPI.mDataSignSecret != null && !mSensorsDataAPI.mDataSignSecret.isEmpty()) {
+                createSignRequest(connection, param.toString());
+            }
+
             out = connection.getOutputStream();
             bout = new BufferedOutputStream(out);
             bout.write(requestBody);
@@ -553,4 +561,72 @@ public class AnalyticsMessages {
             }
         }
     }
+
+    private HttpURLConnection createSignRequest(HttpURLConnection connection, String requestBody) {
+        String timestamp = String.valueOf((new Date().getTime() / 1000));
+        String sign = createSign(connection, timestamp, requestBody);
+        connection.addRequestProperty("sign", sign);
+        connection.addRequestProperty("timestamp", timestamp);
+        return connection;
+    }
+
+    private String createSign(HttpURLConnection connection, String timestamp, String requestBody) {
+        StringBuilder signBuilder = new StringBuilder();
+        /* 参与验签参数 */
+        // String query = connection.getURL().getQuery();
+        // appendSignValue(signBuilder, sortQuery(query));
+        appendSignBody(signBuilder, requestBody);
+        appendSignTimestamp(signBuilder, timestamp);
+        appendSignValue(signBuilder, "&secret=" + mSensorsDataAPI.mDataSignSecret);
+
+        String originalSign = signBuilder.toString();
+        String sign = EncryptUtils.encryptMD5ToString(originalSign);
+        String method = connection.getRequestMethod();
+        String path = connection.getURL().getPath();
+        Log.d(TAG, "接口参数加签-[" + method + "]" + path + ",原始参数："+ originalSign + ", 签名参数：" + sign);
+        return sign;
+    }
+
+    private void appendSignTimestamp(StringBuilder signBuilder, String timestamp) {
+        if (signBuilder.toString().isEmpty()) {
+            appendSignValue(signBuilder, "timestamp=" + timestamp);
+        } else {
+            appendSignValue(signBuilder, "&timestamp=" + timestamp);
+        }
+    }
+
+    private void appendSignBody(StringBuilder signBuilder, String body) {
+        if (body == null || body.isEmpty()) {
+            return;
+        }
+        if (signBuilder.toString().isEmpty()) {
+            appendSignValue(signBuilder, "_body=" + body);
+        } else {
+            appendSignValue(signBuilder, "&_body=" + body);
+        }
+    }
+
+    private void appendSignValue(StringBuilder signBuilder, String value) {
+        if (value == null || value.isEmpty()) {
+            return;
+        }
+        signBuilder.append(value);
+    }
+
+    /*private String sortQuery(String query) {
+        if (query == null || !query.contains("&")) {
+            return query;
+        }
+        val params = query.split("&".toRegex()).dropLastWhile { it.isEmpty() }
+            .toTypedArray()
+        val list: List<String> = params.toList()
+        Collections.sort(list);
+        val ret = StringBuilder()
+        for (s in list) {
+            ret.append(s).append("&")
+        }
+        return ret.toString().substring(0, ret.length - 1);
+    }*/
+
+
 }
