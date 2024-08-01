@@ -202,7 +202,7 @@ class TrackEventAssemble extends BaseEventAssemble {
             try {
                 if (actionType.equals(ActionType.TIME)) {
                     if (sysProperties.has("event_duration")) {
-                        int duration = sysProperties.optInt("event_duration");
+                        int duration = (int) (sysProperties.optDouble("event_duration") * 1000);
                         if (duration <= 0) {
                             SALog.i(TAG, "source:" + source + " subSource:" + subSource + "event_duration is invalid, not handle event");
                             return false;
@@ -292,8 +292,8 @@ class TrackEventAssemble extends BaseEventAssemble {
                     float duration = eventTimer.duration();
                     if (duration > 0) {
                         SALog.i(TAG, "event_duration = " + duration);
-                        // trackEvent.getProperties().put("event_duration", Float.valueOf(duration));
-                        trackEvent.getProperties().put("event_duration", Math.round(duration));
+                        trackEvent.getProperties().put("event_duration", Float.valueOf(duration));
+                        // trackEvent.getProperties().put("event_duration", Math.round(duration));
                     }
                 }
                 if (eventName.endsWith("_SATimer") && eventName.length() > 45) {// Timer 计时交叉计算拼接的字符串长度 45
